@@ -1,0 +1,31 @@
+CREATE TABLE transactionEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    amount REAL NOT NULL,
+    note TEXT NOT NULL,
+    type TEXT NOT NULL,
+    category TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    receiptPath TEXT
+);
+
+getTransactions:
+SELECT * FROM transactionEntity ORDER BY timestamp DESC;
+
+getTransactionById:
+SELECT * FROM transactionEntity WHERE id = ?;
+
+getTransactionsByType:
+SELECT * FROM transactionEntity WHERE type = ? ORDER BY timestamp DESC;
+
+getTransactionsByCategory:
+SELECT * FROM transactionEntity WHERE category = ? ORDER BY timestamp DESC;
+
+insertTransaction:
+INSERT OR REPLACE INTO transactionEntity(id, amount, note, type, category, timestamp, receiptPath)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+deleteTransaction:
+DELETE FROM transactionEntity WHERE id = ?;
+
+deleteAllTransactions:
+DELETE FROM transactionEntity;

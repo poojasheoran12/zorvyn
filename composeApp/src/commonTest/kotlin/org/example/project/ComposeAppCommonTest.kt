@@ -1,4 +1,4 @@
-package org.example.project
+package com.example.zorvyn
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

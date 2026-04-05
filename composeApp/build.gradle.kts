@@ -8,34 +8,54 @@ plugins {
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.sqlDelight)
+    alias(libs.plugins.kotlinSerialization)
 }
 
 kotlin {
     androidTarget {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_11)
+            jvmTarget.set(JvmTarget.JVM_17)
         }
     }
     
-    listOf(
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
+    iosArm64 {
+        binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
         }
     }
-    
+    iosSimulatorArm64 {
+        binaries.framework {
+            baseName = "ComposeApp"
+            isStatic = true
+        }
+    }
+
     sourceSets {
+        val commonMain by getting
+        val iosMain by creating {
+            dependsOn(commonMain)
+            dependencies {
+                implementation(libs.ktor.client.darwin)
+                implementation(libs.sqldelight.native.driver)
+            }
+        }
+        
+        val iosArm64Main by getting {
+            dependsOn(iosMain)
+        }
+        val iosSimulatorArm64Main by getting {
+            dependsOn(iosMain)
+        }
+
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
             implementation(libs.koin.android)
             implementation(libs.ktor.client.okhttp)
             implementation(libs.sqldelight.android.driver)
-            implementation(
-                platform(libs.firebase.bom))
+            implementation(libs.mlkit.text.recognition)
+            implementation(project.dependencies.platform(libs.firebase.bom))
             implementation(libs.firebase.analytics)
         }
         commonMain.dependencies {
@@ -45,21 +65,27 @@ kotlin {
             implementation(libs.compose.ui)
             implementation(libs.compose.components.resources)
             implementation(libs.compose.uiToolingPreview)
+            implementation(libs.compose.materialIcons)
+            implementation(libs.compose.materialIconsExtended)
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.kotlinx.datetime)
+            implementation(libs.peekaboo.image.picker)
+            implementation(libs.peekaboo.ui)
             
             // Koin
             implementation(libs.koin.core)
             implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
 
             // Ktor
             implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.content-negotiation)
-            implementation(libs.ktor.serialization.kotlinx-json)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
 
             // SqlDelight
             implementation(libs.sqldelight.runtime)
+            implementation(libs.sqldelight.coroutines)
 
             // Firebase
             implementation(libs.firebase.auth)
@@ -69,21 +95,16 @@ kotlin {
             implementation(libs.kotlin.test)
         }
         
-        val iosMain by getting {
-            dependencies {
-                implementation(libs.ktor.client.darwin)
-                implementation(libs.sqldelight.native-driver)
-            }
-        }
+
     }
 }
 
 android {
-    namespace = "org.example.project"
+    namespace = "com.example.zorvyn"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "org.example.project"
+        applicationId = "com.example.zorvyn"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
@@ -100,8 +121,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
 
@@ -112,7 +133,7 @@ dependencies {
 sqldelight {
     databases {
         create("AppDatabase") {
-            packageName.set("org.example.project.database")
+            packageName.set("com.example.zorvyn.database")
         }
     }
 }
