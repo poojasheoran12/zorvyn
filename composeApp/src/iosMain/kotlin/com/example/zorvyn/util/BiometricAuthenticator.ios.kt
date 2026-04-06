@@ -12,8 +12,8 @@ class IosBiometricAuthenticator : BiometricAuthenticator {
         onError: (String) -> Unit
     ) {
         val context = LAContext()
-        val error = null // Simplified for KMP native interop
-        
+        val error = null 
+
         if (context.canEvaluatePolicy(LAPolicyDeviceOwnerAuthenticationWithBiometrics, null)) {
             context.evaluatePolicy(
                 LAPolicyDeviceOwnerAuthenticationWithBiometrics,

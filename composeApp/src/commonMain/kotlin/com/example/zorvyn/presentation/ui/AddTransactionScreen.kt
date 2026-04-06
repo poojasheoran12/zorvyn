@@ -32,7 +32,7 @@ fun AddTransactionScreen(
     onBack: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
-    
+
     var amount by remember { mutableStateOf(existingTransaction?.amount?.toString() ?: "") }
     var note by remember { mutableStateOf(existingTransaction?.note ?: "") }
     var type by remember { mutableStateOf(existingTransaction?.type ?: TransactionType.EXPENSE) }
@@ -77,7 +77,7 @@ fun AddTransactionScreen(
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Amount
+
             Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                 Text("How much?", color = Color.Gray, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -102,7 +102,6 @@ fun AddTransactionScreen(
                 )
             }
 
-            // Type
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -134,7 +133,6 @@ fun AddTransactionScreen(
                 }
             }
 
-            // Category Selection
             Column {
                 Text("Category", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(modifier = Modifier.height(12.dp))
@@ -157,7 +155,6 @@ fun AddTransactionScreen(
                 }
             }
 
-            // Receipt Section
             Card(
                 modifier = Modifier.fillMaxWidth().clickable { peekabooLauncher.launch() },
                 shape = RoundedCornerShape(24.dp),
@@ -177,7 +174,6 @@ fun AddTransactionScreen(
                 }
             }
 
-            // Notes
             OutlinedTextField(
                 value = note,
                 onValueChange = { note = it },
@@ -194,7 +190,6 @@ fun AddTransactionScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // Save
             Button(
                 onClick = {
                     val amt = amount.toDoubleOrNull() ?: 0.0

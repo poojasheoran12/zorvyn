@@ -11,25 +11,25 @@ class IosFileExporter : FileExporter, QLPreviewControllerDataSourceProtocol, QLP
 
     override suspend fun saveAndShare(fileName: String, content: String) = withContext(Dispatchers.Main) {
         val rootViewController = UIApplication.sharedApplication.keyWindow?.rootViewController ?: return@withContext
-        
+
         val paths = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, true)
         val cacheDirectory = paths.first() as String
         val filePath = (cacheDirectory as String).let { (it as NSString).stringByAppendingPathComponent(fileName) }
         val fileURL = NSURL.fileURLWithPath(filePath)
-        
+
         content.let { (it as NSString).writeToURL(
             url = fileURL,
             atomically = true,
             encoding = NSUTF8StringEncoding,
             error = null
         )}
-        
+
         fileURLToPreview = fileURL
-        
+
         val previewController = QLPreviewController()
         previewController.dataSource = this@IosFileExporter
         previewController.delegate = this@IosFileExporter
-        
+
         rootViewController.presentViewController(previewController, animated = true, completion = null)
     }
 

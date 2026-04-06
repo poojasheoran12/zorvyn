@@ -39,7 +39,7 @@ class DashboardViewModel(
             val savings = income - expense
             val goal = 5000.0
             val progress = if (goal > 0) (savings / goal) else 0.0
-            
+
             val streak = list.groupBy { 
                 it.timestamp.toLocalDateTime(TimeZone.currentSystemDefault()).dayOfYear 
             }.size.coerceAtMost(7)

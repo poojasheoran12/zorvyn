@@ -52,7 +52,7 @@ fun DashboardScreen(
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 item { GreetingHeader() }
-                
+
                 item {
                     BalanceCard(uiState.balance)
                 }
@@ -78,7 +78,7 @@ fun DashboardScreen(
                         }
                     }
                 }
-                
+
                 if (uiState.recentTransactions.isEmpty()) {
                     item {
                         EmptyState(
@@ -91,7 +91,7 @@ fun DashboardScreen(
                         TransactionItem(transaction)
                     }
                 }
-                
+
                 item { 
                     Spacer(modifier = Modifier.height(100.dp))
                 }
@@ -108,7 +108,7 @@ fun GreetingHeader() {
         in 12..16 -> "Good afternoon"
         else -> "Good evening"
     }
-    
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -131,7 +131,7 @@ fun GreetingHeader() {
                 letterSpacing = (-0.5).sp
             )
         }
-        
+
         Box(
             modifier = Modifier
                 .size(48.dp)
@@ -159,7 +159,7 @@ fun BalanceCard(balance: BalanceState) {
             )
             .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(32.dp))
     ) {
-        // Decorative background elements
+
         Canvas(modifier = Modifier.fillMaxSize()) {
             drawCircle(
                 color = Color(0xFF00C853).copy(alpha = 0.05f),
@@ -167,7 +167,7 @@ fun BalanceCard(balance: BalanceState) {
                 center = androidx.compose.ui.geometry.Offset(size.width, 0f)
             )
         }
-        
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -189,9 +189,9 @@ fun BalanceCard(balance: BalanceState) {
                 fontWeight = FontWeight.Black,
                 letterSpacing = (-1).sp
             )
-            
+
             Spacer(modifier = Modifier.height(28.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -202,9 +202,9 @@ fun BalanceCard(balance: BalanceState) {
                     color = Color(0xFF00C853),
                     isIncome = true
                 )
-                
+
                 Box(modifier = Modifier.width(1.dp).height(40.dp).background(Color.White.copy(alpha = 0.1f)))
-                
+
                 StatItem(
                     label = "Expense",
                     amount = "₹${balance.expense.toInt()}",
@@ -256,14 +256,14 @@ fun ChartSection(data: Map<String, Double>) {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.fillMaxWidth()
             )
-            
+
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Pie Chart
+
                 Box(
                     modifier = Modifier
                         .size(150.dp)
@@ -272,8 +272,7 @@ fun ChartSection(data: Map<String, Double>) {
                 ) {
                     PieChart(data)
                 }
-                
-                // Legend
+
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -294,7 +293,7 @@ fun ChartSection(data: Map<String, Double>) {
 fun PieChart(data: Map<String, Double>) {
     val total = data.values.sum()
     val colors = listOf(Color(0xFF00C853), Color(0xFFFFD600), Color(0xFFFF5252), Color(0xFF448AFF))
-    
+
     val animateFloat = remember { Animatable(0f) }
     LaunchedEffect(data) {
         animateFloat.animateTo(
@@ -302,7 +301,7 @@ fun PieChart(data: Map<String, Double>) {
             animationSpec = tween(durationMillis = 1500, easing = LinearOutSlowInEasing)
         )
     }
-    
+
     Canvas(modifier = Modifier.size(120.dp)) {
         var startAngle = -90f
         data.values.forEachIndexed { index, value ->
@@ -359,9 +358,9 @@ fun TransactionItem(transaction: Transaction) {
             ) {
                 Text(text = transaction.category.icon, fontSize = 20.sp)
             }
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = transaction.note,
@@ -375,7 +374,7 @@ fun TransactionItem(transaction: Transaction) {
                     fontSize = 12.sp
                 )
             }
-            
+
             Column(horizontalAlignment = Alignment.End) {
                 Text(
                     text = (if(transaction.type == TransactionType.INCOME) "+" else "-") + " ₹${transaction.amount.toInt()}",

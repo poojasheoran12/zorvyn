@@ -37,7 +37,7 @@ fun PlanningScreen(
     val budgetUiState by budgetViewModel.uiState.collectAsState()
     val goalUiState by goalViewModel.uiState.collectAsState()
     val dashboardUiState by dashboardViewModel.uiState.collectAsState()
-    
+
     var showAddBudgetDialog by remember { mutableStateOf(false) }
     var showAddGoalDialog by remember { mutableStateOf(false) }
 
@@ -58,7 +58,7 @@ fun PlanningScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             contentPadding = PaddingValues(bottom = 120.dp)
         ) {
-            // Action Section (New UI)
+
             item {
                 PlanningActionSection(
                     onAddBudget = { showAddBudgetDialog = true },
@@ -66,12 +66,10 @@ fun PlanningScreen(
                 )
             }
 
-            // Overview Section
             item {
                 PlanningOverviewCard(budgetUiState.streak, dashboardUiState.balance.savings)
             }
 
-            // Budgets Section
             item {
                 SectionHeader("My Budgets", Icons.Default.AccountBalanceWallet)
             }
@@ -92,7 +90,6 @@ fun PlanningScreen(
                 }
             }
 
-            // Goals Section
             item {
                 SectionHeader("Savings Goals", Icons.Default.Flag)
             }
@@ -214,7 +211,7 @@ fun PlanningOverviewCard(streak: Int, totalSaved: Double) {
                 Text("Total Savings Progress", color = Color.Gray, fontSize = 12.sp)
                 Text("₹ ${totalSaved.toInt()}", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Black)
             }
-            
+
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(16.dp))
@@ -270,9 +267,9 @@ fun BudgetCardInPlanning(budget: Budget, onDelete: () -> Unit) {
                     Icon(Icons.Default.Delete, "Delete", tint = Color.Gray.copy(alpha = 0.5f))
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(20.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -330,9 +327,9 @@ fun PersonalGoalCardInPlanning(goal: Goal, onDelete: () -> Unit) {
                     Icon(Icons.Default.Delete, "Delete", tint = Color.Gray.copy(alpha = 0.5f))
                 }
             }
-            
+
             Spacer(modifier = Modifier.height(20.dp))
-            
+
             val progress = goal.progress
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -341,9 +338,9 @@ fun PersonalGoalCardInPlanning(goal: Goal, onDelete: () -> Unit) {
                 Text(text = "₹${goal.savedAmount.toInt()} saved", color = Color(0xFF00C853), fontSize = 14.sp, fontWeight = FontWeight.Bold)
                 Text(text = "${(progress * 100).toInt()}%", color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
-            
+
             Spacer(modifier = Modifier.height(10.dp))
-            
+
             LinearProgressIndicator(
                 progress = { progress },
                 modifier = Modifier.fillMaxWidth().height(10.dp).clip(CircleShape),
@@ -419,7 +416,7 @@ fun AddBudgetDialog(
                         focusedLabelColor = Color(0xFF00C853)
                     )
                 )
-                
+
                 if (days.toIntOrNull() != null) {
                     val endDate = Clock.System.now().plus(kotlin.time.Duration.parse("${(days.toIntOrNull() ?: 0) * 24}h"))
                     Text(
@@ -466,7 +463,7 @@ fun AddGoalDialog(
     var saved by remember { mutableStateOf("") }
     var daysToAchieve by remember { mutableStateOf("30") }
     var icon by remember { mutableStateOf("🚗") }
-    
+
     val icons = listOf("🚗", "🏠", "🏥", "🎓", "✈️", "💰")
 
     AlertDialog(
@@ -525,7 +522,7 @@ fun AddGoalDialog(
                         focusedLabelColor = Color(0xFF00C853)
                     )
                 )
-                
+
                 if (daysToAchieve.toLongOrNull() != null) {
                     val targetDate = Clock.System.now().plus(kotlin.time.Duration.parse("${(daysToAchieve.toLongOrNull() ?: 0) * 24}h"))
                     Text(
@@ -535,7 +532,7 @@ fun AddGoalDialog(
                         fontWeight = FontWeight.Medium
                     )
                 }
-                
+
                 Text("Select Icon", color = Color.Gray, fontSize = 14.sp)
                 Row(
                     modifier = Modifier.fillMaxWidth(),

@@ -35,7 +35,7 @@ class BudgetViewModel(
 
     private fun loadData() {
         _uiState.update { it.copy(isLoading = true) }
-        
+
         combine(
             budgetRepository.getBudgets(),
             transactionRepository.getTransactions()
@@ -45,7 +45,7 @@ class BudgetViewModel(
             val streak = if (activeBudget != null) {
                 calculateStreak(activeBudget, transactions)
             } else 0
-            
+
             BudgetUiState(budgets = budgets, streak = streak, isLoading = false)
         }.onEach { state ->
             _uiState.value = state
@@ -55,23 +55,22 @@ class BudgetViewModel(
     private fun calculateStreak(budget: Budget, transactions: List<Transaction>): Int {
         val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
         var currentStreak = 0
-        
-        // Start from today and go backwards
-        for (i in 0 until 30) { // Limit streak check to last 30 days
+
+        for (i in 0 until 30) { 
             val date = today.minus(i, DateTimeUnit.DAY)
             if (date < budget.startDate.toLocalDateTime(TimeZone.currentSystemDefault()).date) break
-            
+
             val dayExpenses = transactions.filter {
                 it.timestamp.toLocalDateTime(TimeZone.currentSystemDefault()).date == date
             }.sumOf { it.amount }
-            
+
             if (dayExpenses <= budget.dailyLimit) {
                 currentStreak++
             } else if (i == 0) {
-                // If today is over limit, streak is 0 unless it's just starting
+
                 continue 
             } else {
-                break // Streak broken
+                break 
             }
         }
         return currentStreak

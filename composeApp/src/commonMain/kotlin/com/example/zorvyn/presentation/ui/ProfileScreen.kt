@@ -71,30 +71,30 @@ fun ProfileScreen(
                     tint = Color(0xFF00C853)
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(24.dp))
-            
+
             Text(
                 text = user?.displayName ?: "Pooja Sheoran",
                 color = Color.White,
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
-            
+
             Text(
                 text = user?.email ?: "poojask010@gmail.com",
                 color = Color.Gray,
                 fontSize = 16.sp
             )
-            
+
             Spacer(modifier = Modifier.height(48.dp))
-            
+
             ProfileMenuItem(
                 icon = Icons.Default.Person,
                 title = "Account Details",
                 onClick = {}
             )
-            
+
             ProfileMenuItem(
                 icon = Icons.Default.Settings,
                 title = "Preferences",
@@ -106,9 +106,9 @@ fun ProfileScreen(
                 title = "Export Data (CSV)",
                 onClick = { transactionViewModel.downloadData() }
             )
-            
+
             Spacer(modifier = Modifier.weight(1f))
-            
+
             Button(
                 onClick = {
                     viewModel.signOut()

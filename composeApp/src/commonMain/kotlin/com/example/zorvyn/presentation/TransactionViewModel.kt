@@ -34,7 +34,7 @@ class TransactionViewModel(
                 val csvContent = formatTransactionsToCsv(transactions)
                 fileExporter.saveAndShare("zorvyn_transactions.csv", csvContent)
             } catch (e: Exception) {
-                // Error handling
+
             }
         }
     }
@@ -56,7 +56,7 @@ class TransactionViewModel(
 
     private fun loadTransactions() {
         _uiState.update { it.copy(isLoading = true) }
-        
+
         transactionRepository.getTransactions()
             .onEach { list ->
                 _uiState.update { it.copy(transactions = list, isLoading = false) }
@@ -80,7 +80,7 @@ class TransactionViewModel(
                 TransactionFilter.ALL -> true
                 TransactionFilter.INCOME -> it.type == TransactionType.INCOME
                 TransactionFilter.EXPENSE -> it.type == TransactionType.EXPENSE
-                TransactionFilter.THIS_MONTH -> true // Simplified for demo
+                TransactionFilter.THIS_MONTH -> true 
             }
             val matchesSearch = it.note.contains(state.searchQuery, ignoreCase = true) ||
                     it.category.name.contains(state.searchQuery, ignoreCase = true)

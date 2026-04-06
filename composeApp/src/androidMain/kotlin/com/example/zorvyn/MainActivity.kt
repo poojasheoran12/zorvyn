@@ -17,7 +17,7 @@ class MainActivity : FragmentActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setGlobalActivity(this)
-        
+
         setContent {
             App {
                 androidContext(this@MainActivity)

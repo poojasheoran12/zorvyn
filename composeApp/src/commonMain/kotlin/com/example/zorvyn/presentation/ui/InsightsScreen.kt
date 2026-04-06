@@ -113,7 +113,7 @@ fun InsightHeroCard(balance: BalanceState) {
                 Text("${savingsRate}%", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.ExtraBold)
                 Text("of income saved", color = Color.Gray, fontSize = 12.sp)
             }
-            
+
             Box(contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(
                     progress = { (balance.savings / balance.income).toFloat().coerceIn(0f, 1f) },
@@ -187,7 +187,7 @@ fun SpendingTrendCard() {
         Column(modifier = Modifier.padding(20.dp)) {
             Text("Weekly Trend", color = Color.White, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(16.dp))
-            
+
             Row(
                 modifier = Modifier.fillMaxSize(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -195,7 +195,7 @@ fun SpendingTrendCard() {
             ) {
                 val heights = listOf(0.4f, 0.7f, 0.5f, 0.9f, 0.6f, 0.3f, 0.8f)
                 val days = listOf("M", "T", "W", "T", "F", "S", "S")
-                
+
                 heights.forEachIndexed { index, h ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(
@@ -213,7 +213,6 @@ fun SpendingTrendCard() {
         }
     }
 }
-
 
 @Composable
 fun TopSpendingCard(data: Map<String, Double>) {

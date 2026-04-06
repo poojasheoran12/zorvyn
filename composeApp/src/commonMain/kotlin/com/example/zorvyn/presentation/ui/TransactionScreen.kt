@@ -187,9 +187,9 @@ fun TransactionCard(
             ) {
                 Text(transaction.category.icon, fontSize = 20.sp)
             }
-            
+
             Spacer(modifier = Modifier.width(16.dp))
-            
+
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = transaction.note,
@@ -203,7 +203,7 @@ fun TransactionCard(
                     fontSize = 12.sp
                 )
             }
-            
+
             val amountColor = if (transaction.type == TransactionType.INCOME) Color(0xFF00C853) else Color(0xFFFF5252)
             Column(horizontalAlignment = Alignment.End) {
                 Text(
@@ -242,7 +242,3 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
     )
 }
 
-
-
-
-// End of TransactionScreen

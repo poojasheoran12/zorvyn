@@ -46,24 +46,24 @@ fun LoginScreen(
             modifier = Modifier.size(100.dp),
             tint = Color(0xFF00C853)
         )
-        
+
         Spacer(modifier = Modifier.height(32.dp))
-        
+
         Text(
             text = "Welcome to Zorvyn",
             color = Color.White,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )
-        
+
         Text(
             text = "Manage your finances with ease",
             color = Color.Gray,
             fontSize = 16.sp
         )
-        
+
         Spacer(modifier = Modifier.height(48.dp))
-        
+
         if (isLoading) {
             CircularProgressIndicator(color = Color(0xFF00C853))
         } else {
@@ -84,7 +84,7 @@ fun LoginScreen(
                     fontSize = 16.sp
                 )
             }
-            
+
             error?.let {
                 Spacer(modifier = Modifier.height(24.dp))
                 Card(

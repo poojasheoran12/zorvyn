@@ -15,7 +15,7 @@ data class Budget(
 ) {
     val endDate: Instant
         get() = Instant.fromEpochMilliseconds(startDate.toEpochMilliseconds() + (durationDays * 24L * 60 * 60 * 1000))
-    
+
     val isActive: Boolean
         get() = kotlinx.datetime.Clock.System.now().toEpochMilliseconds() < endDate.toEpochMilliseconds()
 }

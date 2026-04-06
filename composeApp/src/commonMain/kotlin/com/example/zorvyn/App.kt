@@ -32,7 +32,7 @@ fun App(koinAppDeclaration: KoinAppDeclaration? = null) {
     }) {
         val authViewModel: AuthViewModel = koinViewModel()
         val user by authViewModel.user.collectAsState()
-        
+
         var isLocked by remember { mutableStateOf(true) }
         var authError by remember { mutableStateOf<String?>(null) }
         val authenticator = remember { getBiometricAuthenticator() }
@@ -49,7 +49,7 @@ fun App(koinAppDeclaration: KoinAppDeclaration? = null) {
         ) {
             if (user == null) {
                 LoginScreen(onLoginSuccess = { 
-                    // Session established
+
                 })
             } else {
                 LaunchedEffect(Unit) {
@@ -105,7 +105,7 @@ fun LockScreen(error: String?, onRetry: () -> Unit) {
 @Composable
 fun MainLayout() {
     var currentScreen by remember { mutableStateOf("dashboard") }
-    
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
@@ -185,7 +185,7 @@ fun MainLayout() {
     ) { padding ->
         Box(modifier = Modifier.padding(bottom = if(currentScreen == "add_transaction") 0.dp else padding.calculateBottomPadding())) {
             var editingTransaction by remember { mutableStateOf<Transaction?>(null) }
-            
+
             when (currentScreen) {
                 "dashboard" -> DashboardScreen(
                     onSeeAllTransactions = { currentScreen = "transactions" },
@@ -216,7 +216,7 @@ fun MainLayout() {
                 "insights" -> InsightsScreen(onBack = { currentScreen = "dashboard" })
                 "profile" -> ProfileScreen(
                     onBack = { currentScreen = "dashboard" },
-                    onLogout = { /* App will recompose and show LoginScreen */ }
+                    onLogout = {  }
                 )
                 else -> DashboardScreen()
             }
