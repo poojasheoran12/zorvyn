@@ -42,8 +42,8 @@ Zorvyn follows a **Clean MVVM (Model-View-ViewModel)** architecture:
 ### Running the App
 1.  **Clone the repository**:
     ```bash
-    git clone [repository-url]
-    cd Zorvyn_Assignment
+    git clone https://github.com/poojasheoran12/zorvyn
+    cd Zorvyn
     ```
 2.  **Open in Android Studio**:
     Open the root directory and wait for Gradle sync to complete.
