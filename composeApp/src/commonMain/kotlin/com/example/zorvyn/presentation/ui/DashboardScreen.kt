@@ -32,22 +32,14 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = koinViewModel()
+    viewModel: DashboardViewModel = koinViewModel(),
+    onSeeAllTransactions: () -> Unit = {},
+    onAddTransaction: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
-        containerColor = Color(0xFF0F0F0F),
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {},
-                containerColor = Color(0xFF00C853),
-                contentColor = Color.White,
-                shape = CircleShape
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Transaction")
-            }
-        }
+        containerColor = Color(0xFF0F0F0F)
     ) { padding ->
         if (uiState.isLoading) {
             LoadingState(modifier = Modifier.padding(padding))
@@ -70,13 +62,21 @@ fun DashboardScreen(
                 }
 
                 item {
-                    Text(
-                        text = "Recent Activity",
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Recent Activity",
+                            color = Color.White,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.ExtraBold
+                        )
+                        TextButton(onClick = onSeeAllTransactions) {
+                            Text("See All", color = Color(0xFF00C853), fontWeight = FontWeight.Bold)
+                        }
+                    }
                 }
                 
                 if (uiState.recentTransactions.isEmpty()) {

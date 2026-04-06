@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.zorvyn.di.appModule
+import com.example.zorvyn.domain.model.Transaction
 import com.example.zorvyn.presentation.AuthViewModel
 import com.example.zorvyn.presentation.ui.*
 import com.example.zorvyn.util.getBiometricAuthenticator
@@ -108,68 +109,109 @@ fun MainLayout() {
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar(
-                containerColor = Color(0xFF1E1E1E),
-                tonalElevation = 0.dp
-            ) {
-                NavigationBarItem(
-                    selected = currentScreen == "dashboard",
-                    onClick = { currentScreen = "dashboard" },
-                    icon = { Icon(Icons.Default.Home, "Dashboard") },
-                    label = { Text("Home") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF00C853),
-                        selectedTextColor = Color(0xFF00C853),
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray,
-                        indicatorColor = Color(0xFF00C853).copy(alpha = 0.1f)
+            if (currentScreen != "add_transaction") {
+                NavigationBar(
+                    containerColor = Color(0xFF1E1E1E),
+                    tonalElevation = 0.dp
+                ) {
+                    NavigationBarItem(
+                        selected = currentScreen == "dashboard",
+                        onClick = { currentScreen = "dashboard" },
+                        icon = { Icon(Icons.Default.Home, "Dashboard") },
+                        label = { Text("Home") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF00C853),
+                            selectedTextColor = Color(0xFF00C853),
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray,
+                            indicatorColor = Color(0xFF00C853).copy(alpha = 0.1f)
+                        )
                     )
-                )
-                NavigationBarItem(
-                    selected = currentScreen == "plan",
-                    onClick = { currentScreen = "plan" },
-                    icon = { Icon(Icons.Default.DateRange, "Plan") },
-                    label = { Text("Plan") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF00C853),
-                        selectedTextColor = Color(0xFF00C853),
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray,
-                        indicatorColor = Color(0xFF00C853).copy(alpha = 0.1f)
+                    NavigationBarItem(
+                        selected = currentScreen == "transactions",
+                        onClick = { currentScreen = "transactions" },
+                        icon = { Icon(Icons.Default.History, "Activity") },
+                        label = { Text("Activity") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF00C853),
+                            selectedTextColor = Color(0xFF00C853),
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray,
+                            indicatorColor = Color(0xFF00C853).copy(alpha = 0.1f)
+                        )
                     )
-                )
-                NavigationBarItem(
-                    selected = currentScreen == "insights",
-                    onClick = { currentScreen = "insights" },
-                    icon = { Icon(Icons.Default.Insights, "Insights") },
-                    label = { Text("Insights") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF00C853),
-                        selectedTextColor = Color(0xFF00C853),
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray,
-                        indicatorColor = Color(0xFF00C853).copy(alpha = 0.1f)
+                    NavigationBarItem(
+                        selected = currentScreen == "plan",
+                        onClick = { currentScreen = "plan" },
+                        icon = { Icon(Icons.Default.DateRange, "Plan") },
+                        label = { Text("Plan") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF00C853),
+                            selectedTextColor = Color(0xFF00C853),
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray,
+                            indicatorColor = Color(0xFF00C853).copy(alpha = 0.1f)
+                        )
                     )
-                )
-                NavigationBarItem(
-                    selected = currentScreen == "profile",
-                    onClick = { currentScreen = "profile" },
-                    icon = { Icon(Icons.Default.Person, "Profile") },
-                    label = { Text("Profile") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF00C853),
-                        selectedTextColor = Color(0xFF00C853),
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray,
-                        indicatorColor = Color(0xFF00C853).copy(alpha = 0.1f)
+                    NavigationBarItem(
+                        selected = currentScreen == "insights",
+                        onClick = { currentScreen = "insights" },
+                        icon = { Icon(Icons.Default.Insights, "Insights") },
+                        label = { Text("Insights") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF00C853),
+                            selectedTextColor = Color(0xFF00C853),
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray,
+                            indicatorColor = Color(0xFF00C853).copy(alpha = 0.1f)
+                        )
                     )
-                )
+                    NavigationBarItem(
+                        selected = currentScreen == "profile",
+                        onClick = { currentScreen = "profile" },
+                        icon = { Icon(Icons.Default.Person, "Profile") },
+                        label = { Text("Profile") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF00C853),
+                            selectedTextColor = Color(0xFF00C853),
+                            unselectedIconColor = Color.Gray,
+                            unselectedTextColor = Color.Gray,
+                            indicatorColor = Color(0xFF00C853).copy(alpha = 0.1f)
+                        )
+                    )
+                }
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(bottom = padding.calculateBottomPadding())) {
+        Box(modifier = Modifier.padding(bottom = if(currentScreen == "add_transaction") 0.dp else padding.calculateBottomPadding())) {
+            var editingTransaction by remember { mutableStateOf<Transaction?>(null) }
+            
             when (currentScreen) {
-                "dashboard" -> DashboardScreen()
+                "dashboard" -> DashboardScreen(
+                    onSeeAllTransactions = { currentScreen = "transactions" },
+                    onAddTransaction = { 
+                        editingTransaction = null
+                        currentScreen = "add_transaction" 
+                    }
+                )
+                "add_transaction" -> AddTransactionScreen(
+                    existingTransaction = editingTransaction,
+                    onBack = { 
+                        currentScreen = if(editingTransaction != null) "transactions" else "dashboard"
+                        editingTransaction = null
+                    }
+                )
+                "transactions" -> TransactionScreen(
+                    onBack = { currentScreen = "dashboard" },
+                    onAddTransaction = { 
+                        editingTransaction = null
+                        currentScreen = "add_transaction" 
+                    },
+                    onEditTransaction = { transaction ->
+                        editingTransaction = transaction
+                        currentScreen = "add_transaction"
+                    }
+                )
                 "plan" -> PlanningScreen(onBack = { currentScreen = "dashboard" })
                 "insights" -> InsightsScreen(onBack = { currentScreen = "dashboard" })
                 "profile" -> ProfileScreen(

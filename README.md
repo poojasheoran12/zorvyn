@@ -1,35 +1,63 @@
-This is a Kotlin Multiplatform project targeting Android, iOS.
+# Zorvyn - Smart Financial Transaction Manager
 
-* [/composeApp](./composeApp/src) is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - [commonMain](./composeApp/src/commonMain/kotlin) is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    the [iosMain](./composeApp/src/iosMain/kotlin) folder would be the right place for such calls.
-    Similarly, if you want to edit the Desktop (JVM) specific part, the [jvmMain](./composeApp/src/jvmMain/kotlin)
-    folder is the appropriate location.
+Zorvyn is a high-performance, cross-platform financial management application built using **Kotlin Multiplatform (KMP)** and **Compose Multiplatform**. It allows users to track their incomes and expenses with an offline-first architecture, cloud synchronization, and AI-powered receipt scanning.
 
-* [/iosApp](./iosApp/iosApp) contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## 🚀 Features
 
-### Build and Run Android Application
+-   **Dashboard**: Real-time spending analysis, budget tracking, and balance visualization.
+-   **AI Receipt Scanning**: Instantly extract amounts, merchants, and transaction types from photos/screenshots of receipts (UPI, retail, etc.).
+-   **Transaction History**: Search, filter, and manage your financial records with ease.
+-   **Offline-First**: All data is stored locally in a type-safe SQL database for zero-latency access.
+-   **Cloud Backup**: Seamless integration with **Firebase Firestore** for cross-device data continuity.
+-   **Smart Savings**: Goal-based saving streaks and persistent budget alerts.
+-   **Data Export**: Preview and share your transaction history as professionally formatted **CSV files**.
+-   **Security**: Integrated **Biometric Authentication** (FaceID/Fingerprint) for your financial privacy.
 
-To build and run the development version of the Android app, use the run configuration from the run widget
-in your IDE’s toolbar or build it directly from the terminal:
-- on macOS/Linux
-  ```shell
-  ./gradlew :composeApp:assembleDebug
-  ```
-- on Windows
-  ```shell
-  .\gradlew.bat :composeApp:assembleDebug
-  ```
+## 🛠️ Tech Stack
 
-### Build and Run iOS Application
+-   **Core**: Kotlin Multiplatform (KMP)
+-   **UI**: Compose Multiplatform (shared between Android & iOS)
+-   **Database**: SqlDelight (Local persistence)
+-   **Backend**: Firebase Firestore (Cloud persistence)
+-   **Dependency Injection**: Koin
+-   **Reactive Programming**: Kotlin Coroutines & StateFlow
+-   **AI/OCR**: Google ML Kit (Android) & Apple Vision Framework (iOS)
+-   **Images**: Peekaboo (Image picking & processing)
+-   **Time**: kotlinx-datetime
 
-To build and run the development version of the iOS app, use the run configuration from the run widget
-in your IDE’s toolbar or open the [/iosApp](./iosApp) directory in Xcode and run it from there.
+## 🏛️ Architecture
 
----
+Zorvyn follows a **Clean MVVM (Model-View-ViewModel)** architecture:
+-   **Presentation Layer**: Compose Multiplatform views with state-driven ViewModels.
+-   **Domain Layer**: Pure Kotlin business logic, interfaces, and models.
+-   **Data Layer**: Offline-first repository pattern managing SqlDelight and Firestore syncing.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…# zorvyn
+## ⚙️ Setup & Installation
+
+### Prerequisites
+-   **Android Studio** (Koala or newer)
+-   **Xcode** (15.0+ for iOS targets)
+-   **JDK 17** or 21
+
+### Running the App
+1.  **Clone the repository**:
+    ```bash
+    git clone [repository-url]
+    cd Zorvyn_Assignment
+    ```
+2.  **Open in Android Studio**:
+    Open the root directory and wait for Gradle sync to complete.
+3.  **Run Android**:
+    Select the `composeApp` configuration and pick an Android Emulator/Device.
+4.  **Run iOS**:
+    - Select the `iosApp` configuration in Android Studio.
+    - Alternatively, open `iosApp/iosApp.xcworkspace` in Xcode.
+
+## 📈 Technical Decisions
+
+-   **Why KMP?**: To maintain 90%+ code sharing efficiency while keeping the performance and reliability of native platform APIs.
+-   **Why SQLDelight?**: Type-safe SQL ensures financial calculations are accurate at the database level.
+-   **AI Choice**: On-device OCR (ML Kit/Vision) was chosen over cloud-based AI to ensure 100% user privacy and offline functionality.
+
+## 📄 License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

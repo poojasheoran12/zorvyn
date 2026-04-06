@@ -41,11 +41,12 @@ import kotlinx.coroutines.launch
 @Composable
 fun TransactionScreen(
     viewModel: TransactionViewModel = koinViewModel(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onAddTransaction: () -> Unit = {},
+    onEditTransaction: (Transaction) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val transactions by viewModel.filteredTransactions.collectAsState()
-    var showBottomSheet by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = Color(0xFF0F0F0F),
@@ -56,11 +57,7 @@ fun TransactionScreen(
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 actions = {
                     IconButton(onClick = {
-                        scope.launch {
-                            viewModel.exportToCsv().collect { csv ->
-                                println("EXPORTED CSV:\n$csv")
-                            }
-                        }
+                        viewModel.downloadData()
                     }) {
                         Icon(Icons.Default.Download, "Export CSV", tint = Color.White)
                     }
@@ -74,11 +71,10 @@ fun TransactionScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { showBottomSheet = true },
+                onClick = onAddTransaction,
                 containerColor = Color(0xFF00C853),
                 contentColor = Color.White,
-                shape = CircleShape,
-                modifier = Modifier.padding(bottom = 16.dp, end = 8.dp)
+                shape = CircleShape
             ) {
                 Icon(Icons.Default.Add, "Add Transaction")
             }
@@ -118,23 +114,13 @@ fun TransactionScreen(
                     items(transactions) { transaction ->
                         TransactionCard(
                             transaction = transaction,
-                            onDelete = { viewModel.deleteTransaction(transaction.id) }
+                            onDelete = { viewModel.deleteTransaction(transaction.id) },
+                            onEdit = { onEditTransaction(transaction) }
                         )
                     }
                 }
             }
         }
-    }
-
-    if (showBottomSheet) {
-        AddTransactionBottomSheet(
-            viewModel = viewModel,
-            onDismiss = { showBottomSheet = false },
-            onSave = { amount, note, type, category, receipt ->
-                viewModel.addTransaction(amount, note, type, category, receipt)
-                showBottomSheet = false
-            }
-        )
     }
 }
 
@@ -259,218 +245,4 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
 
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun AddTransactionBottomSheet(
-    viewModel: TransactionViewModel,
-    onDismiss: () -> Unit,
-    onSave: (Double, String, TransactionType, TransactionCategory, String?) -> Unit
-) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
-    
-    var amount by remember { mutableStateOf("") }
-    var note by remember { mutableStateOf("") }
-    var type by remember { mutableStateOf(TransactionType.EXPENSE) }
-    var category by remember { mutableStateOf(TransactionCategory.FOOD) }
-    var receiptPath by remember { mutableStateOf<String?>(null) }
-    var isProcessingReceipt by remember { mutableStateOf(false) }
-
-    val peekabooLauncher = rememberImagePickerLauncher(
-        scope = scope,
-        onResult = { images ->
-            images.firstOrNull()?.let { imageBytes ->
-                receiptPath = "local_receipt_uri" // Placeholder
-                isProcessingReceipt = true
-                scope.launch {
-                    val data = viewModel.processReceipt(imageBytes)
-                    data.amount?.let { amount = it.toString() }
-                    data.note?.let { note = it }
-                    isProcessingReceipt = false
-                }
-            }
-        }
-    )
-    
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = Color(0xFF1E1E1E),
-        contentColor = Color.White,
-        dragHandle = { BottomSheetDefaults.DragHandle(color = Color.Gray) }
-    ) {
-        Column(
-            modifier = Modifier
-                .padding(24.dp)
-                .fillMaxWidth()
-                .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
-        ) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text("Add Transaction", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                if (isProcessingReceipt) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = Color(0xFF00C853), strokeWidth = 2.dp)
-                }
-            }
-            
-            // Amount Input
-            OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                label = { Text("Amount") },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                prefix = { Text("₹ ") },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF00C853),
-                    unfocusedBorderColor = Color.Gray,
-                    unfocusedLabelColor = Color.Gray,
-                    focusedLabelColor = Color(0xFF00C853)
-                ),
-                shape = RoundedCornerShape(12.dp)
-            )
-            
-            // Type Toggle
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .clip(RoundedCornerShape(25.dp))
-                    .background(Color(0xFF2A2A2A))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(25.dp))
-                        .background(if(type == TransactionType.INCOME) Color(0xFF00C853) else Color.Transparent)
-                        .clickable { type = TransactionType.INCOME },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Income", fontWeight = FontWeight.Bold)
-                }
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .clip(RoundedCornerShape(25.dp))
-                        .background(if(type == TransactionType.EXPENSE) Color(0xFFFF5252) else Color.Transparent)
-                        .clickable { type = TransactionType.EXPENSE },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text("Expense", fontWeight = FontWeight.Bold)
-                }
-            }
-            
-            // Category Selector
-            Column {
-                Text("Category", fontSize = 12.sp, color = Color.Gray)
-                Row(modifier = Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    TransactionCategory.entries.forEach { cat ->
-                        FilterChip(
-                            selected = category == cat,
-                            onClick = { category = cat },
-                            label = { Text(cat.icon + " " + cat.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                            shape = RoundedCornerShape(12.dp),
-                            colors = FilterChipDefaults.filterChipColors(
-                                selectedContainerColor = Color(0xFF00C853),
-                                containerColor = Color(0xFF2A2A2A)
-                            ),
-                            border = null
-                        )
-                    }
-                }
-            }
-            
-            // Receipt Section
-            ReceiptUploadSection(
-                receiptPath = receiptPath, 
-                onPhotoAdded = { peekabooLauncher.launch() }, 
-                onRemove = { receiptPath = null }
-            )
-            
-            // Notes field
-            OutlinedTextField(
-                value = note,
-                onValueChange = { note = it },
-                label = { Text("Notes / Merchant") },
-                modifier = Modifier.fillMaxWidth(),
-                maxLines = 3,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color(0xFF00C853),
-                    unfocusedBorderColor = Color.Gray
-                ),
-                shape = RoundedCornerShape(12.dp)
-            )
-            
-            // Save Button
-            Button(
-                onClick = { 
-                    val amt = amount.toDoubleOrNull() ?: 0.0
-                    onSave(amt, if(note.isEmpty()) category.name else note, type, category, receiptPath) 
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00C853)),
-                shape = RoundedCornerShape(27.dp)
-            ) {
-                Text("Save Transaction", fontWeight = FontWeight.ExtraBold, fontSize = 16.sp)
-            }
-            
-            Spacer(modifier = Modifier.height(24.dp))
-        }
-    }
-}
-
-@Composable
-fun ReceiptUploadSection(receiptPath: String?, onPhotoAdded: () -> Unit, onRemove: () -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Add Receipt", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
-        
-        if (receiptPath == null) {
-            OutlinedButton(
-                onClick = onPhotoAdded,
-                modifier = Modifier.fillMaxWidth().height(60.dp),
-                shape = RoundedCornerShape(12.dp),
-                border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.5f)),
-                colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.LightGray)
-            ) {
-                Icon(Icons.Default.CameraAlt, "Camera")
-                Spacer(modifier = Modifier.width(12.dp))
-                Text("Add Receipt", fontWeight = FontWeight.Bold)
-            }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(180.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color(0xFF2A2A2A)),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.Image, "Receipt", modifier = Modifier.size(48.dp), tint = Color.Gray)
-                    Text("Receipt Preview Loaded", color = Color.Gray, fontSize = 12.sp)
-                }
-                
-                Row(
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    TextButton(onClick = onPhotoAdded, colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFF00C853))) {
-                        Text("Change")
-                    }
-                    TextButton(onClick = onRemove, colors = ButtonDefaults.textButtonColors(contentColor = Color.Red)) {
-                        Text("Remove")
-                    }
-                }
-            }
-        }
-    }
-}
-
-// Utility extension
-private fun String.capitalize(): String {
-    return this.lowercase().replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
-}
+// End of TransactionScreen

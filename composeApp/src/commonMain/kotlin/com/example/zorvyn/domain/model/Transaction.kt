@@ -15,9 +15,13 @@ enum class TransactionType {
 @Serializable
 enum class TransactionCategory(val icon: String) {
     FOOD("🍔"),
-    TRAVEL("🚗"),
+    TRANSPORT("🚗"),
+    TRAVEL("✈️"),
     SHOPPING("🛍️"),
-    OTHERS("💰")
+    HEALTHCARE("🏥"),
+    RENT("🏠"),
+    SALARY("💰"),
+    OTHER("✨")
 }
 
 @Serializable

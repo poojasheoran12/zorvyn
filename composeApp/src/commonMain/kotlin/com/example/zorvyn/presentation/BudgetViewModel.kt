@@ -3,7 +3,8 @@ package com.example.zorvyn.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.zorvyn.domain.model.*
-import com.example.zorvyn.domain.repository.FinancialRepository
+import com.example.zorvyn.domain.repository.BudgetRepository
+import com.example.zorvyn.domain.repository.TransactionRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.*
@@ -15,13 +16,20 @@ data class BudgetUiState(
 )
 
 class BudgetViewModel(
-    private val repository: FinancialRepository
+    private val budgetRepository: BudgetRepository,
+    private val transactionRepository: TransactionRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BudgetUiState())
     val uiState: StateFlow<BudgetUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            val budgets = budgetRepository.getBudgets().first()
+            if (budgets.isEmpty()) {
+                budgetRepository.seedBudgetData()
+            }
+        }
         loadData()
     }
 
@@ -29,9 +37,10 @@ class BudgetViewModel(
         _uiState.update { it.copy(isLoading = true) }
         
         combine(
-            repository.getBudgets(),
-            repository.getTransactions(type = TransactionType.EXPENSE)
-        ) { budgets, transactions ->
+            budgetRepository.getBudgets(),
+            transactionRepository.getTransactions()
+        ) { budgets, allTransactions ->
+            val transactions = allTransactions.filter { it.type == TransactionType.EXPENSE }
             val activeBudget = budgets.firstOrNull { it.isActive }
             val streak = if (activeBudget != null) {
                 calculateStreak(activeBudget, transactions)
@@ -48,7 +57,7 @@ class BudgetViewModel(
         var currentStreak = 0
         
         // Start from today and go backwards
-        for (i in 0 until budget.durationDays) {
+        for (i in 0 until 30) { // Limit streak check to last 30 days
             val date = today.minus(i, DateTimeUnit.DAY)
             if (date < budget.startDate.toLocalDateTime(TimeZone.currentSystemDefault()).date) break
             
@@ -58,6 +67,9 @@ class BudgetViewModel(
             
             if (dayExpenses <= budget.dailyLimit) {
                 currentStreak++
+            } else if (i == 0) {
+                // If today is over limit, streak is 0 unless it's just starting
+                continue 
             } else {
                 break // Streak broken
             }
@@ -76,13 +88,13 @@ class BudgetViewModel(
                 startDate = Clock.System.now(),
                 createdAt = Clock.System.now()
             )
-            repository.addBudget(budget)
+            budgetRepository.addBudget(budget)
         }
     }
 
     fun deleteBudget(id: String) {
         viewModelScope.launch {
-            repository.deleteBudget(id)
+            budgetRepository.deleteBudget(id)
         }
     }
 }

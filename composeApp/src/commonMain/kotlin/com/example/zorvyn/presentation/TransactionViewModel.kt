@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import com.example.zorvyn.domain.model.*
-import com.example.zorvyn.domain.repository.FinancialRepository
+import com.example.zorvyn.domain.repository.TransactionRepository
 import com.example.zorvyn.util.ReceiptData
 import com.example.zorvyn.util.TextRecognizer
 import com.example.zorvyn.util.FileExporter
@@ -22,7 +22,7 @@ data class TransactionUiState(
 )
 
 class TransactionViewModel(
-    private val repository: FinancialRepository,
+    private val transactionRepository: TransactionRepository,
     private val textRecognizer: TextRecognizer,
     private val fileExporter: FileExporter
 ) : ViewModel() {
@@ -30,12 +30,21 @@ class TransactionViewModel(
     fun downloadData() {
         viewModelScope.launch {
             try {
-                val csvContent = repository.exportToCsv().first()
-                fileExporter.saveAndShare("transactions_export.csv", csvContent)
+                val transactions = transactionRepository.getTransactions().first()
+                val csvContent = formatTransactionsToCsv(transactions)
+                fileExporter.saveAndShare("zorvyn_transactions.csv", csvContent)
             } catch (e: Exception) {
-                // Handle error
+                // Error handling
             }
         }
+    }
+
+    private fun formatTransactionsToCsv(list: List<Transaction>): String {
+        val header = "ID,Amount,Note,Type,Category,Date\n"
+        val rows = list.joinToString("\n") { 
+            "${it.id},${it.amount},\"${it.note}\",${it.type},${it.category},${it.formattedDate}"
+        }
+        return header + rows
     }
 
     private val _uiState = MutableStateFlow(TransactionUiState())
@@ -48,7 +57,7 @@ class TransactionViewModel(
     private fun loadTransactions() {
         _uiState.update { it.copy(isLoading = true) }
         
-        repository.getTransactions()
+        transactionRepository.getTransactions()
             .onEach { list ->
                 _uiState.update { it.copy(transactions = list, isLoading = false) }
             }.launchIn(viewModelScope)
@@ -71,7 +80,7 @@ class TransactionViewModel(
                 TransactionFilter.ALL -> true
                 TransactionFilter.INCOME -> it.type == TransactionType.INCOME
                 TransactionFilter.EXPENSE -> it.type == TransactionType.EXPENSE
-                TransactionFilter.THIS_MONTH -> true // Simplification
+                TransactionFilter.THIS_MONTH -> true // Simplified for demo
             }
             val matchesSearch = it.note.contains(state.searchQuery, ignoreCase = true) ||
                     it.category.name.contains(state.searchQuery, ignoreCase = true)
@@ -99,21 +108,19 @@ class TransactionViewModel(
                 category = category,
                 receiptPath = receiptPath
             )
-            repository.addTransaction(newTransaction)
+            transactionRepository.addTransaction(newTransaction)
         }
     }
 
     fun updateTransaction(transaction: Transaction) {
         viewModelScope.launch {
-            repository.updateTransaction(transaction)
+            transactionRepository.updateTransaction(transaction)
         }
     }
 
     fun deleteTransaction(id: String) {
         viewModelScope.launch {
-            repository.deleteTransaction(id)
+            transactionRepository.deleteTransaction(id)
         }
     }
-
-    fun exportToCsv(): Flow<String> = repository.exportToCsv()
 }

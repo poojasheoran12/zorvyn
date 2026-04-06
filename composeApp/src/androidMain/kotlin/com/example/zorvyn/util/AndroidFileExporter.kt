@@ -18,16 +18,23 @@ class AndroidFileExporter(private val context: Context) : FileExporter {
             file
         )
         
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/csv"
-            putExtra(Intent.EXTRA_STREAM, uri)
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(uri, "text/csv")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
-        
-        val chooser = Intent.createChooser(intent, "Export Data").apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         
-        context.startActivity(chooser)
+        try {
+            context.startActivity(intent)
+        } catch (e: Exception) {
+            // Fallback to share if no viewer is found
+            val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/csv"
+                putExtra(Intent.EXTRA_STREAM, uri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            context.startActivity(Intent.createChooser(shareIntent, "Open with..."))
+        }
     }
 }

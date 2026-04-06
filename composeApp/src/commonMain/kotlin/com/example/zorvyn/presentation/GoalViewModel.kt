@@ -3,7 +3,7 @@ package com.example.zorvyn.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.zorvyn.domain.model.Goal
-import com.example.zorvyn.domain.repository.FinancialRepository
+import com.example.zorvyn.domain.repository.GoalRepository
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -15,19 +15,25 @@ data class GoalUiState(
 )
 
 class GoalViewModel(
-    private val repository: FinancialRepository
+    private val goalRepository: GoalRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GoalUiState())
     val uiState: StateFlow<GoalUiState> = _uiState.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            val goals = goalRepository.getGoals().first()
+            if (goals.isEmpty()) {
+                goalRepository.seedGoalData()
+            }
+        }
         loadGoals()
     }
 
     private fun loadGoals() {
         _uiState.update { it.copy(isLoading = true) }
-        repository.getGoals()
+        goalRepository.getGoals()
             .onEach { list ->
                 _uiState.update { it.copy(goals = list, isLoading = false) }
             }.launchIn(viewModelScope)
@@ -50,13 +56,13 @@ class GoalViewModel(
                 icon = icon,
                 createdAt = Clock.System.now()
             )
-            repository.addGoal(goal)
+            goalRepository.addGoal(goal)
         }
     }
 
     fun deleteGoal(id: String) {
         viewModelScope.launch {
-            repository.deleteGoal(id)
+            goalRepository.deleteGoal(id)
         }
     }
 }
