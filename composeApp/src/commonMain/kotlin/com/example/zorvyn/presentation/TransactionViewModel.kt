@@ -8,6 +8,7 @@ import com.example.zorvyn.domain.model.*
 import com.example.zorvyn.domain.repository.FinancialRepository
 import com.example.zorvyn.util.ReceiptData
 import com.example.zorvyn.util.TextRecognizer
+import com.example.zorvyn.util.FileExporter
 
 enum class TransactionFilter {
     ALL, INCOME, EXPENSE, THIS_MONTH
@@ -22,8 +23,20 @@ data class TransactionUiState(
 
 class TransactionViewModel(
     private val repository: FinancialRepository,
-    private val textRecognizer: TextRecognizer
+    private val textRecognizer: TextRecognizer,
+    private val fileExporter: FileExporter
 ) : ViewModel() {
+
+    fun downloadData() {
+        viewModelScope.launch {
+            try {
+                val csvContent = repository.exportToCsv().first()
+                fileExporter.saveAndShare("transactions_export.csv", csvContent)
+            } catch (e: Exception) {
+                // Handle error
+            }
+        }
+    }
 
     private val _uiState = MutableStateFlow(TransactionUiState())
     val uiState: StateFlow<TransactionUiState> = _uiState.asStateFlow()

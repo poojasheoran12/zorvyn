@@ -29,3 +29,43 @@ DELETE FROM transactionEntity WHERE id = ?;
 
 deleteAllTransactions:
 DELETE FROM transactionEntity;
+
+CREATE TABLE goalEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    targetAmount REAL NOT NULL,
+    savedAmount REAL NOT NULL,
+    desiredDate INTEGER NOT NULL,
+    icon TEXT NOT NULL,
+    createdAt INTEGER NOT NULL
+);
+
+getGoals:
+SELECT * FROM goalEntity ORDER BY createdAt DESC;
+
+insertGoal:
+INSERT OR REPLACE INTO goalEntity(id, name, targetAmount, savedAmount, desiredDate, icon, createdAt)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+deleteGoal:
+DELETE FROM goalEntity WHERE id = ?;
+
+CREATE TABLE budgetEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    totalBudget REAL NOT NULL,
+    dailyLimit REAL NOT NULL,
+    durationDays INTEGER NOT NULL,
+    startDate INTEGER NOT NULL,
+    createdAt INTEGER NOT NULL
+);
+
+getBudgets:
+SELECT * FROM budgetEntity ORDER BY createdAt DESC;
+
+insertBudget:
+INSERT OR REPLACE INTO budgetEntity(id, name, totalBudget, dailyLimit, durationDays, startDate, createdAt)
+VALUES (?, ?, ?, ?, ?, ?, ?);
+
+deleteBudget:
+DELETE FROM budgetEntity WHERE id = ?;

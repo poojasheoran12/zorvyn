@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.zorvyn.presentation.AuthViewModel
+import com.example.zorvyn.presentation.TransactionViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,7 +31,8 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ProfileScreen(
     onBack: () -> Unit,
     onLogout: () -> Unit,
-    viewModel: AuthViewModel = koinViewModel()
+    viewModel: AuthViewModel = koinViewModel(),
+    transactionViewModel: TransactionViewModel = koinViewModel()
 ) {
     val user by viewModel.user.collectAsState()
 
@@ -96,6 +99,12 @@ fun ProfileScreen(
                 icon = Icons.Default.Settings,
                 title = "Preferences",
                 onClick = {}
+            )
+
+            ProfileMenuItem(
+                icon = Icons.Default.FileDownload,
+                title = "Export Data (CSV)",
+                onClick = { transactionViewModel.downloadData() }
             )
             
             Spacer(modifier = Modifier.weight(1f))

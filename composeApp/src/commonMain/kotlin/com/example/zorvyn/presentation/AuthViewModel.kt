@@ -31,6 +31,19 @@ class AuthViewModel(private val authRepository: AuthRepository) : ViewModel() {
         }
     }
 
+    fun signInAnonymously() {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            authRepository.signInAnonymously().onSuccess {
+                _user.value = it
+            }.onFailure {
+                _error.value = it.message
+            }
+            _isLoading.value = false
+        }
+    }
+
     fun signOut() {
         viewModelScope.launch {
             authRepository.signOut()

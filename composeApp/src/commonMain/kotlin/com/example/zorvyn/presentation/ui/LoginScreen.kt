@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -66,19 +67,8 @@ fun LoginScreen(
         if (isLoading) {
             CircularProgressIndicator(color = Color(0xFF00C853))
         } else {
-            // In a real app, this would trigger the actual Google Sign-In flow
-            // For this implementation, we simulate the token exchange
             Button(
-                onClick = { 
-                    // Simulate Google Sign-In Success with a mock token
-                    // viewModel.signInWithGoogle("mock_google_id_token")
-                    
-                    // NOTE: In a real production app, you'd use a platform-specific 
-                    // Google Sign-In helper to get the idToken.
-                    // For the sake of this assignment, we'll assume the interaction
-                    // is handled and we proceed to the dashboard or profile.
-                    onLoginSuccess() 
-                },
+                onClick = { viewModel.signInAnonymously() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(56.dp),
@@ -88,20 +78,28 @@ fun LoginScreen(
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Google Icon would go here
-                    Text(
-                        text = "Continue with Google",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                }
+                Text(
+                    text = "Continue with Google",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
-            
             error?.let {
-                Text(text = it, color = Color.Red, fontSize = 14.sp)
+                Spacer(modifier = Modifier.height(24.dp))
+                Card(
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFFF5252).copy(alpha = 0.1f)),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(Icons.Default.Error, null, tint = Color(0xFFFF5252), modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = it, color = Color(0xFFFF5252), fontSize = 13.sp)
+                    }
+                }
             }
         }
     }

@@ -99,8 +99,14 @@ fun TransactionScreen(
                 onFilterSelected = { viewModel.setFilter(it) }
             )
 
-            if (transactions.isEmpty()) {
-                EmptyState()
+            if (uiState.isLoading) {
+                LoadingState()
+            } else if (transactions.isEmpty()) {
+                EmptyState(
+                    message = if (uiState.searchQuery.isNotEmpty()) 
+                        "No transactions match your search" 
+                    else "No transactions found for this filter"
+                )
             } else {
                 LazyColumn(
                     modifier = Modifier
@@ -250,41 +256,6 @@ fun SearchBar(query: String, onQueryChange: (String) -> Unit) {
     )
 }
 
-@Composable
-fun EmptyState() {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Box(
-            modifier = Modifier
-                .size(150.dp)
-                .clip(CircleShape)
-                .background(Color(0xFF1E1E1E)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                Icons.Default.ReceiptLong,
-                "No Transactions",
-                modifier = Modifier.size(60.dp),
-                tint = Color.Gray.copy(alpha = 0.5f)
-            )
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            "No transactions yet",
-            color = Color.White,
-            fontWeight = FontWeight.Bold,
-            fontSize = 18.sp
-        )
-        Text(
-            "Tap + to add your first transaction",
-            color = Color.Gray,
-            fontSize = 14.sp
-        )
-    }
-}
 
 
 

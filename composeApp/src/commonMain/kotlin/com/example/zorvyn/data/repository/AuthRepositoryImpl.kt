@@ -23,6 +23,15 @@ class AuthRepositoryImpl : AuthRepository {
         }
     }
 
+    override suspend fun signInAnonymously(): Result<FirebaseUser?> {
+        return try {
+            val authResult = auth.signInAnonymously()
+            Result.success(authResult.user)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun signOut() {
         auth.signOut()
     }

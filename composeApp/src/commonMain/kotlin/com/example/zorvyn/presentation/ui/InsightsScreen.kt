@@ -46,37 +46,46 @@ fun InsightsScreen(
             )
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            contentPadding = PaddingValues(bottom = 32.dp)
-        ) {
-            item {
-                InsightHeroCard(uiState.balance)
-            }
+        if (uiState.isLoading) {
+            LoadingState(modifier = Modifier.padding(padding))
+        } else if (uiState.categoryChartData.isEmpty()) {
+            EmptyState(
+                message = "Not enough data yet for insights. Start adding transactions to see patterns!",
+                modifier = Modifier.padding(padding)
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp),
+                contentPadding = PaddingValues(bottom = 32.dp)
+            ) {
+                item {
+                    InsightHeroCard(uiState.balance)
+                }
 
-            item {
-                Text(
-                    text = "Spending Patterns",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                item {
+                    Text(
+                        text = "Spending Patterns",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
 
-            item {
-                CategoryBreakdownDetailed(uiState.categoryChartData)
-            }
+                item {
+                    CategoryBreakdownDetailed(uiState.categoryChartData)
+                }
 
-            item {
-                SpendingTrendCard()
-            }
+                item {
+                    SpendingTrendCard()
+                }
 
-            item {
-                TopSpendingCard(uiState.categoryChartData)
+                item {
+                    TopSpendingCard(uiState.categoryChartData)
+                }
             }
         }
     }
@@ -204,6 +213,7 @@ fun SpendingTrendCard() {
         }
     }
 }
+
 
 @Composable
 fun TopSpendingCard(data: Map<String, Double>) {

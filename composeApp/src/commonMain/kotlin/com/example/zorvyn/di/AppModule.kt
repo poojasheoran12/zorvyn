@@ -7,6 +7,7 @@ import com.example.zorvyn.domain.repository.FinancialRepository
 import com.example.zorvyn.presentation.AuthViewModel
 import com.example.zorvyn.presentation.DashboardViewModel
 import com.example.zorvyn.presentation.TransactionViewModel
+import com.example.zorvyn.presentation.GoalViewModel
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
@@ -15,6 +16,7 @@ import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
 
 import com.example.zorvyn.database.AppDatabase
+import com.example.zorvyn.presentation.BudgetViewModel
 
 expect val platformModule: Module
 
@@ -27,4 +29,6 @@ val appModule = module {
     viewModelOf(::DashboardViewModel)
     viewModelOf(::TransactionViewModel)
     viewModelOf(::AuthViewModel)
+    viewModelOf(::GoalViewModel)
+    viewModelOf(::BudgetViewModel)
 }

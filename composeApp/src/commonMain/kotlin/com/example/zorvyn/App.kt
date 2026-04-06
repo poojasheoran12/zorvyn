@@ -126,10 +126,10 @@ fun MainLayout() {
                     )
                 )
                 NavigationBarItem(
-                    selected = currentScreen == "transactions",
-                    onClick = { currentScreen = "transactions" },
-                    icon = { Icon(Icons.Default.List, "Transactions") },
-                    label = { Text("Cards") },
+                    selected = currentScreen == "plan",
+                    onClick = { currentScreen = "plan" },
+                    icon = { Icon(Icons.Default.DateRange, "Plan") },
+                    label = { Text("Plan") },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = Color(0xFF00C853),
                         selectedTextColor = Color(0xFF00C853),
@@ -143,19 +143,6 @@ fun MainLayout() {
                     onClick = { currentScreen = "insights" },
                     icon = { Icon(Icons.Default.Insights, "Insights") },
                     label = { Text("Insights") },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = Color(0xFF00C853),
-                        selectedTextColor = Color(0xFF00C853),
-                        unselectedIconColor = Color.Gray,
-                        unselectedTextColor = Color.Gray,
-                        indicatorColor = Color(0xFF00C853).copy(alpha = 0.1f)
-                    )
-                )
-                NavigationBarItem(
-                    selected = currentScreen == "goal",
-                    onClick = { currentScreen = "goal" },
-                    icon = { Icon(Icons.Default.Star, "Goal") },
-                    label = { Text("Goal") },
                     colors = NavigationBarItemDefaults.colors(
                         selectedIconColor = Color(0xFF00C853),
                         selectedTextColor = Color(0xFF00C853),
@@ -180,12 +167,11 @@ fun MainLayout() {
             }
         }
     ) { padding ->
-        Box(modifier = Modifier.padding(padding)) {
+        Box(modifier = Modifier.padding(bottom = padding.calculateBottomPadding())) {
             when (currentScreen) {
                 "dashboard" -> DashboardScreen()
-                "transactions" -> TransactionScreen()
+                "plan" -> PlanningScreen(onBack = { currentScreen = "dashboard" })
                 "insights" -> InsightsScreen(onBack = { currentScreen = "dashboard" })
-                "goal" -> GoalScreen(onBack = { currentScreen = "dashboard" })
                 "profile" -> ProfileScreen(
                     onBack = { currentScreen = "dashboard" },
                     onLogout = { /* App will recompose and show LoginScreen */ }

@@ -11,6 +11,8 @@ import com.example.zorvyn.domain.model.*
 import com.example.zorvyn.domain.repository.FinancialRepository
 import com.example.zorvyn.database.AppDatabase
 import com.example.zorvyn.database.TransactionEntity
+import com.example.zorvyn.database.GoalEntity
+import com.example.zorvyn.database.BudgetEntity
 import app.cash.sqldelight.coroutines.asFlow
 import app.cash.sqldelight.coroutines.mapToList
 import kotlin.time.Duration.Companion.days
@@ -20,6 +22,8 @@ class FinancialRepositoryImpl(
     private val database: AppDatabase
 ) : FinancialRepository {
     private val transactionsCollection = firestore.collection("transactions")
+    private val goalsCollection = firestore.collection("goals")
+    private val budgetsCollection = firestore.collection("budgets")
     private val queries = database.appDatabaseQueries
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -42,6 +46,40 @@ class FinancialRepositoryImpl(
             } catch (e: Exception) {
                 // Handle offline or error
             }
+        }
+
+        // Sync Firestore Goals to Local SQLDelight
+        repositoryScope.launch {
+            try {
+                goalsCollection.snapshots.collect { snapshot ->
+                    val remoteGoals = snapshot.documents.map { it.data<Goal>() }
+                    database.transaction {
+                        remoteGoals.forEach { 
+                            queries.insertGoal(
+                                it.id, it.name, it.targetAmount, it.savedAmount,
+                                it.desiredDate.toEpochMilliseconds(), it.icon, it.createdAt.toEpochMilliseconds()
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {}
+        }
+
+        // Sync Firestore Budgets to Local SQLDelight
+        repositoryScope.launch {
+            try {
+                budgetsCollection.snapshots.collect { snapshot ->
+                    val remoteBudgets = snapshot.documents.map { it.data<Budget>() }
+                    database.transaction {
+                        remoteBudgets.forEach { 
+                            queries.insertBudget(
+                                it.id, it.name, it.totalBudget, it.dailyLimit, 
+                                it.durationDays.toLong(), it.startDate.toEpochMilliseconds(), it.createdAt.toEpochMilliseconds()
+                            )
+                        }
+                    }
+                }
+            } catch (e: Exception) {}
         }
     }
 
@@ -134,6 +172,50 @@ class FinancialRepositoryImpl(
         header + rows
     }
 
+    override fun getGoals(): Flow<List<Goal>> = 
+        queries.getGoals().asFlow().mapToList(Dispatchers.Default).map { list ->
+            list.map { it.toDomain() }
+        }
+
+    override suspend fun addGoal(goal: Goal) {
+        queries.insertGoal(
+            goal.id, goal.name, goal.targetAmount, goal.savedAmount,
+            goal.desiredDate.toEpochMilliseconds(), goal.icon, goal.createdAt.toEpochMilliseconds()
+        )
+        try {
+            goalsCollection.document(goal.id).set(goal)
+        } catch (e: Exception) {}
+    }
+
+    override suspend fun deleteGoal(id: String) {
+        queries.deleteGoal(id)
+        try {
+            goalsCollection.document(id).delete()
+        } catch (e: Exception) {}
+    }
+
+    override fun getBudgets(): Flow<List<Budget>> = 
+        queries.getBudgets().asFlow().mapToList(Dispatchers.Default).map { list ->
+            list.map { it.toDomain() }
+        }
+
+    override suspend fun addBudget(budget: Budget) {
+        queries.insertBudget(
+            budget.id, budget.name, budget.totalBudget, budget.dailyLimit,
+            budget.durationDays.toLong(), budget.startDate.toEpochMilliseconds(), budget.createdAt.toEpochMilliseconds()
+        )
+        try {
+            budgetsCollection.document(budget.id).set(budget)
+        } catch (e: Exception) {}
+    }
+
+    override suspend fun deleteBudget(id: String) {
+        queries.deleteBudget(id)
+        try {
+            budgetsCollection.document(id).delete()
+        } catch (e: Exception) {}
+    }
+
     private fun TransactionEntity.toDomain() = Transaction(
         id = id,
         amount = amount,
@@ -142,5 +224,25 @@ class FinancialRepositoryImpl(
         category = TransactionCategory.valueOf(category),
         timestamp = Instant.fromEpochMilliseconds(timestamp),
         receiptPath = receiptPath
+    )
+
+    private fun GoalEntity.toDomain() = Goal(
+        id = id,
+        name = name,
+        targetAmount = targetAmount,
+        savedAmount = savedAmount,
+        desiredDate = Instant.fromEpochMilliseconds(desiredDate),
+        icon = icon,
+        createdAt = Instant.fromEpochMilliseconds(createdAt)
+    )
+
+    private fun BudgetEntity.toDomain() = Budget(
+        id = id,
+        name = name,
+        totalBudget = totalBudget,
+        dailyLimit = dailyLimit,
+        durationDays = durationDays.toInt(),
+        startDate = Instant.fromEpochMilliseconds(startDate),
+        createdAt = Instant.fromEpochMilliseconds(createdAt)
     )
 }

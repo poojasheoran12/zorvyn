@@ -49,89 +49,53 @@ fun DashboardScreen(
             }
         }
     ) { padding ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            item { GreetingHeader() }
-            item { BalanceCard(uiState.balance) }
-            item { SavingsProgressSection(uiState.balance) }
-            item { ChartSection(uiState.categoryChartData) }
-            item {
-                Text(
-                    text = "Recent Transactions",
-                    color = Color.White,
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-            items(uiState.recentTransactions) { transaction ->
-                TransactionItem(transaction)
-            }
-            item { 
-                Spacer(modifier = Modifier.height(100.dp))
-            }
-        }
-    }
-}
-
-@Composable
-fun SavingsProgressSection(balance: BalanceState) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Savings Progress",
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "${balance.streakDays} Day Streak! 🔥",
-                    color = Color(0xFFFFD600),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            val progress = (balance.savings / balance.monthlyGoal).toFloat().coerceIn(0f, 1f)
-            LinearProgressIndicator(
-                progress = { progress },
+        if (uiState.isLoading) {
+            LoadingState(modifier = Modifier.padding(padding))
+        } else {
+            LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(10.dp)
-                    .clip(CircleShape),
-                color = Color(0xFF00C853),
-                trackColor = Color(0xFF2A2A2A),
-                strokeCap = StrokeCap.Round
-            )
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("₹${balance.savings.toInt()} saved", color = Color.Gray, fontSize = 13.sp)
-                Text("Goal: ₹${balance.monthlyGoal.toInt()}", color = Color.Gray, fontSize = 13.sp)
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                item { GreetingHeader() }
+                
+                item {
+                    BalanceCard(uiState.balance)
+                }
+
+                item {
+                    ChartSection(uiState.categoryChartData)
+                }
+
+                item {
+                    Text(
+                        text = "Recent Activity",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+                
+                if (uiState.recentTransactions.isEmpty()) {
+                    item {
+                        EmptyState(
+                            message = "No transactions yet. Start by adding your first income or expense!",
+                            modifier = Modifier.fillMaxWidth().height(200.dp)
+                        )
+                    }
+                } else {
+                    items(uiState.recentTransactions) { transaction ->
+                        TransactionItem(transaction)
+                    }
+                }
+                
+                item { 
+                    Spacer(modifier = Modifier.height(100.dp))
+                }
             }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = balance.smartFeedback,
-                color = Color(0xFF00C853),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium
-            )
         }
     }
 }
@@ -140,164 +104,133 @@ fun SavingsProgressSection(balance: BalanceState) {
 fun GreetingHeader() {
     val now = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
     val greeting = when(now.hour) {
-        in 5..11 -> "Good Morning"
-        in 12..16 -> "Good Afternoon"
-        else -> "Good Evening"
+        in 5..11 -> "Good morning"
+        in 12..16 -> "Good afternoon"
+        else -> "Good evening"
     }
     
-    Column(modifier = Modifier.padding(top = 16.dp)) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 24.dp, bottom = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column {
             Text(
-                text = "$greeting, Pooja 👋",
+                text = "${greeting},",
+                color = Color.Gray,
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = "Pooja Sheoran",
                 color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold
+                fontSize = 24.sp,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-0.5).sp
             )
         }
-        Text(
-            text = "${now.month.name.lowercase()}, ${now.dayOfMonth} ${now.dayOfWeek.name.lowercase()}",
-            color = Color.Gray,
-            fontSize = 14.sp
-        )
+        
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF1E1E1E))
+                .border(1.dp, Color(0xFF00C853).copy(alpha = 0.2f), CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text("PS", color = Color(0xFF00C853), fontWeight = FontWeight.Bold)
+        }
     }
 }
 
 @Composable
 fun BalanceCard(balance: BalanceState) {
-    Card(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(180.dp)
-            .shadow(20.dp, RoundedCornerShape(24.dp), ambientColor = Color(0xFF00C853).copy(alpha = 0.3f)),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Gradient Background Detail
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        colors = listOf(Color(0xFF00C853).copy(alpha = 0.15f), Color.Transparent),
-                        radius = 400f
-                    ),
-                    center = center
+            .height(200.dp)
+            .clip(RoundedCornerShape(32.dp))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(Color(0xFF1E1E1E), Color(0xFF0F0F0F))
                 )
-            }
-            
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "₹ ${balance.currentBalance.toInt()}",
-                    color = Color.White,
-                    fontSize = 36.sp,
-                    fontWeight = FontWeight.ExtraBold
-                )
-                Text(
-                    text = "Current Balance",
-                    color = Color.Gray,
-                    fontSize = 14.sp
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    BalanceStatItem(
-                        label = "Income",
-                        amount = "₹ ${balance.income.toInt()}",
-                        color = Color(0xFF00C853),
-                        isIncome = true
-                    )
-                    BalanceStatItem(
-                        label = "Expense",
-                        amount = "₹ ${balance.expense.toInt()}",
-                        color = Color(0xFFFF5252),
-                        isIncome = false
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun BalanceStatItem(label: String, amount: String, color: Color, isIncome: Boolean) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(color)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Column {
-            Text(
-                text = (if(isIncome) "+" else "-") + " " + amount,
-                color = color,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold
             )
-            Text(
-                text = label,
-                color = Color.Gray,
-                fontSize = 12.sp
+            .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(32.dp))
+    ) {
+        // Decorative background elements
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            drawCircle(
+                color = Color(0xFF00C853).copy(alpha = 0.05f),
+                radius = 300f,
+                center = androidx.compose.ui.geometry.Offset(size.width, 0f)
             )
         }
-    }
-}
-
-@Composable
-fun SummaryRow(balance: BalanceState) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        SummaryCard(
-            label = "Income",
-            amount = "₹${balance.income.toInt()}",
-            color = Color(0xFF00C853),
-            modifier = Modifier.weight(1f)
-        )
-        SummaryCard(
-            label = "Expense",
-            amount = "₹${balance.expense.toInt()}",
-            color = Color(0xFFFF5252),
-            modifier = Modifier.weight(1f)
-        )
-        SummaryCard(
-            label = "Savings",
-            amount = "₹${balance.savings.toInt()}",
-            color = Color(0xFF448AFF),
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-fun SummaryCard(label: String, amount: String, color: Color, modifier: Modifier) {
-    Card(
-        modifier = modifier.height(100.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
-    ) {
+        
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(28.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text(text = label, color = Color.Gray, fontSize = 12.sp)
+            Text(
+                text = "Total Balance",
+                color = Color.Gray,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = amount, color = color, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Text(
+                text = "₹ ${balance.currentBalance.toInt()}",
+                color = Color.White,
+                fontSize = 40.sp,
+                fontWeight = FontWeight.Black,
+                letterSpacing = (-1).sp
+            )
+            
+            Spacer(modifier = Modifier.height(28.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                StatItem(
+                    label = "Income",
+                    amount = "₹${balance.income.toInt()}",
+                    color = Color(0xFF00C853),
+                    isIncome = true
+                )
+                
+                Box(modifier = Modifier.width(1.dp).height(40.dp).background(Color.White.copy(alpha = 0.1f)))
+                
+                StatItem(
+                    label = "Expense",
+                    amount = "₹${balance.expense.toInt()}",
+                    color = Color(0xFFFF5252),
+                    isIncome = false
+                )
+            }
         }
+    }
+}
+
+@Composable
+fun StatItem(label: String, amount: String, color: Color, isIncome: Boolean) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = label,
+            color = Color.Gray,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Medium
+        )
+        Text(
+            text = (if(isIncome) "+" else "-") + " " + amount,
+            color = Color.White,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 
@@ -402,33 +335,60 @@ fun LegendItem(label: String, color: Color) {
 
 @Composable
 fun TransactionItem(transaction: Transaction) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1E1E1E))
     ) {
-        Box(
+        Row(
             modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF1E1E1E)),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = transaction.category.icon, fontSize = 20.sp)
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        if (transaction.type == TransactionType.INCOME) 
+                            Color(0xFF00C853).copy(alpha = 0.1f) 
+                        else Color(0xFF2A2A2A)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(text = transaction.category.icon, fontSize = 20.sp)
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = transaction.note,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = transaction.category.name,
+                    color = Color.Gray,
+                    fontSize = 12.sp
+                )
+            }
+            
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    text = (if(transaction.type == TransactionType.INCOME) "+" else "-") + " ₹${transaction.amount.toInt()}",
+                    color = if(transaction.type == TransactionType.INCOME) Color(0xFF00C853) else Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.ExtraBold
+                )
+                Text(
+                    text = transaction.formattedDate,
+                    color = Color.Gray,
+                    fontSize = 10.sp
+                )
+            }
         }
-        
-        Spacer(modifier = Modifier.width(16.dp))
-        
-        Column(modifier = Modifier.weight(1f)) {
-            Text(text = transaction.note, color = Color.White, fontWeight = FontWeight.SemiBold)
-            Text(text = transaction.formattedDate, color = Color.Gray, fontSize = 12.sp)
-        }
-        
-        Text(
-            text = (if(transaction.type == TransactionType.INCOME) "+" else "-") + " ₹${transaction.amount.toInt()}",
-            color = if(transaction.type == TransactionType.INCOME) Color(0xFF00C853) else Color.White,
-            fontWeight = FontWeight.Bold
-        )
     }
 }
