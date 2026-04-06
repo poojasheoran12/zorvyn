@@ -9,10 +9,14 @@ import androidx.compose.ui.tooling.preview.Preview
 
 import org.koin.android.ext.koin.androidContext
 
-class MainActivity : ComponentActivity() {
+import androidx.fragment.app.FragmentActivity
+import com.example.zorvyn.util.setGlobalActivity
+
+class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        setGlobalActivity(this)
         
         setContent {
             App {

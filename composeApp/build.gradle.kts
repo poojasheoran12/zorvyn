@@ -56,6 +56,7 @@ kotlin {
             implementation(libs.sqldelight.android.driver)
             implementation(libs.mlkit.text.recognition)
             implementation(project.dependencies.platform(libs.firebase.bom))
+            implementation(libs.androidx.biometric)
             implementation(libs.firebase.analytics)
         }
         commonMain.dependencies {

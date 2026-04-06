@@ -101,4 +101,6 @@ class TransactionViewModel(
             repository.deleteTransaction(id)
         }
     }
+
+    fun exportToCsv(): Flow<String> = repository.exportToCsv()
 }

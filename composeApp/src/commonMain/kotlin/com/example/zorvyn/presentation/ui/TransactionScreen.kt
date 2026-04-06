@@ -50,10 +50,20 @@ fun TransactionScreen(
     Scaffold(
         containerColor = Color(0xFF0F0F0F),
         topBar = {
+            val scope = rememberCoroutineScope()
             TopAppBar(
                 title = { Text("Transactions", color = Color.White, fontWeight = FontWeight.Bold) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 actions = {
+                    IconButton(onClick = {
+                        scope.launch {
+                            viewModel.exportToCsv().collect { csv ->
+                                println("EXPORTED CSV:\n$csv")
+                            }
+                        }
+                    }) {
+                        Icon(Icons.Default.Download, "Export CSV", tint = Color.White)
+                    }
                     IconButton(onClick = {}) { Icon(Icons.Default.Search, "Search", tint = Color.White) }
                     IconButton(onClick = {}) { Icon(Icons.Default.FilterList, "Filter", tint = Color.White) }
                 },
